@@ -12,16 +12,29 @@ metadata_file = 'COMP90086_2024_Project_train/train.csv'
 # Load the metadata CSV file
 metadata = pd.read_csv(metadata_file)
 
-# Function to load images and preprocess them
 def load_images_and_metadata(image_folder, metadata_df):
     images = []
     metadata_features = []
     labels = []
     
     for idx, row in metadata_df.iterrows():
+        # Construct the image path
+        img_path = os.path.join(image_folder, f'{row["id"]}.jpg')
+        
+        # Check if the image exists
+        if not os.path.exists(img_path):
+            print(f"Image {img_path} not found.")
+            continue
+        
         # Load the image
-        img_path = os.path.join(image_folder, f'{row["id"]}.png')
         image = cv2.imread(img_path)
+        
+        # Check if the image is loaded correctly
+        if image is None:
+            print(f"Failed to load image {img_path}")
+            continue
+        
+        # Resize the image
         image = cv2.resize(image, (224, 224))  # Resize to a fixed size
         image = img_to_array(image) / 255.0  # Normalize image
         
@@ -35,6 +48,7 @@ def load_images_and_metadata(image_folder, metadata_df):
         labels.append(row['stable_height'])
     
     return np.array(images), np.array(metadata_features), np.array(labels)
+
 
 # Load training data
 images, metadata_features, labels = load_images_and_metadata(train_image_folder, metadata)
